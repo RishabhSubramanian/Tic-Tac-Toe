@@ -1,3 +1,4 @@
+import numpy as np
 from copy import deepcopy
 from typing import Optional
 
@@ -29,6 +30,9 @@ class Grid:
         self.size = size
         self.values = [[0 for i in range(size)] for j in range(size)]
 
+    def __repr__(self) -> str:
+        return str(np.array(self.values))
+
     @property
     def transposed_values(self) -> list[list[int]]:
         """
@@ -47,7 +51,7 @@ class Grid:
                 return False
 
         return True
-    
+
     # Methods
 
     def get_cell(self, loc: Point) -> int:
@@ -82,7 +86,7 @@ class TicTacToe:
     """
     Class that contains the Game Logic for TicTacToe, extended to allow larger boards and more than
         2 players in a game
-    
+
     Attributes:
         num_players [int]: 
         size [int]: 
@@ -90,7 +94,7 @@ class TicTacToe:
         grid [Grid]: 
         copy [TicTacToe]: 
         game_over [bool]: 
-    
+
     Methods:
         winning_line: 
         winners: 
@@ -109,6 +113,11 @@ class TicTacToe:
             raise ValueError('Too many players to play game')
         if size < 3:
             raise ValueError('Board is too small for a valid game')
+        if size > 7:
+            raise ValueError('Board is too large to play game')
+
+        if size == 3 and num_players > 2:
+            raise ValueError('Size must be greater than 3 for a game with more than 2 players')
 
         self.num_players = num_players
         self.size = size
@@ -129,7 +138,7 @@ class TicTacToe:
         if self.grid.full:
             return True
 
-        if (any(self.grid.values[i][i] == self.grid.values[0][0] for i in range(self.size)) and
+        if (all(self.grid.values[i][i] == self.grid.values[0][0] for i in range(self.size)) and
             self.grid.values[0][0] != 0):
             return True
 
@@ -146,12 +155,12 @@ class TicTacToe:
                 return True
 
         return False
-    
+
     # Methods
 
     def winning_line(self) -> Optional[list[Point]]:
         if self.grid.full:
-            return None
+            return []
 
         if (all(self.grid.values[i][i] == self.grid.values[0][0] for i in range(self.size)) and
             self.grid.values[0][0] != 0):
@@ -171,16 +180,16 @@ class TicTacToe:
             if all(x == col[0] for x in col) and (col[0] != 0):
                 return [(i, c) for i in range(self.size)]
 
-        return []
+        return None
 
     def winners(self) -> list[int]:
         line = self.winning_line()
         if line is None:
-            return list(range(1, self.num_players + 1))
-        
-        if not line:
             return []
-        
+
+        if not line:
+            return list(range(1, self.num_players + 1))
+
         return [self.grid.get_cell(line[0])]
 
     def try_move(self, move: Point) -> bool:
@@ -188,5 +197,6 @@ class TicTacToe:
             return False
 
         self.grid.change_value(move, self.cur_player)
-        self.cur_player = (self.cur_player + 1) % self.num_players
+        self.cur_player = ((self.cur_player) % self.num_players) + 1
+
         return True
