@@ -41,7 +41,8 @@ class Button:
             pg.draw.rect(self.surface, rect_color, (0, 0, self.rect.width, self.rect.height),
                         int(min_size//20), int(min_size//4))
         rendered_text = self.font.render(text, True, foreground_color)
-        self.surface.blit(rendered_text, ((self.rect.width - rendered_text.get_size()[0])/2, (self.rect.height - rendered_text.get_size()[1])/2))
+        self.surface.blit(rendered_text, ((self.rect.width - rendered_text.get_size()[0])/2,
+                                          (self.rect.height - rendered_text.get_size()[1])/2))
 
     def show(self, screen: pg.Surface) -> None:
         screen.blit(self.surface, (self.x, self.y))
@@ -93,20 +94,21 @@ class GUI:
             2: self.draw_game_screen
         }
         self.buttons = []
+        
+        self.clock = pg.time.Clock()
+        self.starting_time = time.time()
+        self.num_players = 2
+        self.board_size = 3
+        self.player_types = [False, False]
 
         self.fonts = {
             'Huge Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//7, width//4)),
             'Big Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//20, width//14)),
             'Small Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//30, width//21)),
             'Tiny Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//40, width//28)),
-            'Unicode': pg.font.Font("assets/fonts/unicode_font.ttf", min(height//30, width//20))
+            'Unicode': pg.font.Font("assets/fonts/unicode_font.ttf", min(height//30, width//20)),
+            'Piece': pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)/10))
         }
-
-        self.clock = pg.time.Clock()
-        self.starting_time = time.time()
-        self.num_players = 2
-        self.board_size = 3
-        self.player_types = [False, False]
 
     def incr_num_players(self) -> None:
         if self.num_players < 4:
@@ -122,10 +124,12 @@ class GUI:
     def incr_board_size(self) -> None:
         if self.board_size < 7:
             self.board_size += 1
+            self.fonts['Piece'] = pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)/10))
     
     def decr_board_size(self) -> None:
         if self.board_size > 3:
             self.board_size -= 1
+            self.fonts['Piece'] = pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)/10))
 
     def next_screen(self) -> None:
         self.screen_type = (self.screen_type + 1) % 3
@@ -182,8 +186,9 @@ class GUI:
         size_up_button.show(self.screen)
         size_down_button.show(self.screen)
 
-        next_button = Button('NEXT', (self.size[0]/2 - int(box_size), 3*self.size[1]/4), self.fonts['Small Arcade'],
-                             (2*int(box_size), int(box_size)), "#FFD1DC", True, "#FFFFFF")
+        next_button = Button('NEXT', (self.size[0]/2 - int(box_size), 3*self.size[1]/4),
+                             self.fonts['Small Arcade'], (2*int(box_size), int(box_size)),
+                             "#FFD1DC", True, "#FFFFFF")
         next_button.show(self.screen)
 
         self.buttons = [
@@ -220,7 +225,7 @@ class GUI:
             self.screen.blit(piece, (padding[0] + col_length*(col - 1/2) - piece.get_width()/2,
                                      padding[1] + table_dims[1]/4 - piece.get_height()/2 +
                                      piece.get_height()/15 * np.sin(time.time() - self.starting_time)))
-            
+
             font_name = 'Big Arcade' if self.num_players != 4 else 'Small Arcade'
             text_rendered = self.fonts[font_name].render('CPU?', True, '#FFFFFF')
             self.screen.blit(text_rendered, (padding[0] + col_length*(col - 1/2) - text_rendered.get_width()/2,
@@ -234,7 +239,9 @@ class GUI:
 
             self.buttons.append((cpu_button, lambda player=col: self.change_player_type(player)))
         
-        next_button = Button('START', (3*self.size[0]/4, self.size[1] - 2*padding[1]), self.fonts['Tiny Arcade'], (3*self.size[0]/16, padding[1]), '#FFFFFF', True, '#FFFFFF')
+        next_button = Button('START', (3*self.size[0]/4, self.size[1] - 2*padding[1]),
+                             self.fonts['Tiny Arcade'], (3*self.size[0]/16, padding[1]),
+                             '#FFFFFF', True, '#FFFFFF')
         next_button.show(self.screen)
         
         self.buttons.append((next_button, self.next_screen))
@@ -267,10 +274,12 @@ class GUI:
                     winning_line = self.game.winning_line()
                     assert winning_line is not None
                     if (row, col) in winning_line:
-                        pg.draw.rect(self.screen, "#55B3A2", pg.Rect(padding[0]+int((col+1/40)*cell_size), padding[1]+int((row+1/40)*cell_size), 0.95*cell_size, 0.95*cell_size))
+                        pg.draw.rect(self.screen, "#55B3A2", pg.Rect(padding[0]+(col+1/30)*cell_size,
+                                                                     padding[1]+(row+1/30)*cell_size,
+                                                                     0.95*cell_size, 0.95*cell_size))
 
-                cell_button = Button(piece, (padding[0] + col*int(cell_size), padding[1] + row*int(cell_size)),
-                                     self.fonts['Huge Arcade'], (int(cell_size), int(cell_size)), color, False)
+                cell_button = Button(piece, (padding[0] + (col+1/20)*cell_size, padding[1] + (row+1/20)*int(cell_size)),
+                                     self.fonts['Piece'], (int(cell_size), int(cell_size)), color, False)
                 cell_button.show(self.screen)
                 self.buttons.append((cell_button, lambda r=row, c=col: self.game.try_move((r, c)) if not self.game.game_over else None))
 
@@ -278,11 +287,15 @@ class GUI:
             if len(self.game.winners()) > 1:
                 winning_text = self.fonts['Big Arcade'].render('TIE', True, '#FFFFFF')
             else:
-                winning_text = self.fonts['Big Arcade'].render(PIECES[self.game.winners()[0]-1][0] + ' HAS WON', True, PIECES[self.game.winners()[0]-1][1])
-            self.screen.blit(winning_text, (self.size[0]/2 - winning_text.get_width()/2, 9*self.size[1]/10 - winning_text.get_height()/2))
+                winning_text = self.fonts['Big Arcade'].render(PIECES[self.game.winners()[0]-1][0] + ' HAS WON',
+                                                               True, PIECES[self.game.winners()[0]-1][1])
+            self.screen.blit(winning_text, (self.size[0]/2 - winning_text.get_width()/2,
+                                            9*self.size[1]/10 - winning_text.get_height()/2))
         else:
-            current_player = self.fonts['Huge Arcade'].render(PIECES[self.game.cur_player-1][0], True, PIECES[self.game.cur_player-1][1])
-            self.screen.blit(current_player, (self.size[0]/4 - current_player.get_width()/2, 9*self.size[1]/10 - current_player.get_height()/2))
+            current_player = self.fonts['Huge Arcade'].render(PIECES[self.game.cur_player-1][0], True,
+                                                              PIECES[self.game.cur_player-1][1])
+            self.screen.blit(current_player, (self.size[0]/4 - current_player.get_width()/2,
+                                              9*self.size[1]/10 - current_player.get_height()/2))
 
     def run(self) -> None:
         while True:
@@ -299,14 +312,15 @@ class GUI:
                         'Big Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//20, event.w//14)),
                         'Small Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//30, event.w//21)),
                         'Tiny Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//40, event.w//28)),
-                        'Unicode': pg.font.Font("assets/fonts/unicode_font.ttf", min(event.h//30, event.w//20))
+                        'Unicode': pg.font.Font("assets/fonts/unicode_font.ttf", min(event.h//30, event.w//20)),
+                        'Piece': pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)/10))
                     }
 
                 for button, func in self.buttons:
                     if button.click(event):
                         func()
 
-            self.draw_functions[self.screen_type]()                    
+            self.draw_functions[self.screen_type]()
 
             pg.display.flip()
             self.clock.tick(60)
