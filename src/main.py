@@ -57,7 +57,7 @@ class Button:
 
 
 BACKGROUND_COLOR = "#5F5F5F"
-PIECES: list[tuple[str, str]] = [('X', '#A7C7E7'), ('O', '#FFD1DC'), ('V', '#C1E1C1'), ('M', '#FDFD96')]
+PIECES: list[tuple[str, str]] = [('X', '#A7C7E7'), ('O', '#FFD1DC'), ('V', '#C1E1C1'), ('W', '#FDFD96')]
 
 
 class GUI:
@@ -115,7 +115,7 @@ class GUI:
 
     def incr_num_players(self) -> None:
         if self.num_players < 4:
-            if self.board_size != 3:
+            # if self.board_size != 3:
                 self.num_players += 1
                 self.player_types += [False]
                 self.bots += [None]
@@ -249,12 +249,12 @@ class GUI:
             cpu_button.show(self.screen)
 
             self.buttons.append((cpu_button, lambda player=col: self.change_player_type(player)))
-        
+
         next_button = Button('START', (3*self.size[0]/4, self.size[1] - 2*padding[1]),
                              self.fonts['Tiny Arcade'], (3*self.size[0]/16, padding[1]),
                              '#FFFFFF', True, '#FFFFFF')
         next_button.show(self.screen)
-        
+
         self.buttons.append((next_button, self.next_screen_12))
 
     def draw_game_screen(self) -> None:

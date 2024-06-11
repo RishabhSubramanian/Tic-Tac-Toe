@@ -28,17 +28,16 @@ class Bot:
                     score -= 0.5
             return score
 
-    @staticmethod
-    def minimax(game: TicTacToe, depth: int, maximizing: bool, alpha: float, beta: float) -> float:
+    def minimax(self, game: TicTacToe, depth: int, maximizing: bool, alpha: float, beta: float) -> float:
         if depth == 0 or game.game_over:
-            return Bot.evaluate_state(game, 1)
+            return Bot.evaluate_state(game, self.player)
 
         if maximizing:
             max_eval = float("-inf")
             for move in game.available_moves():
                 game_copy = deepcopy(game)
                 game_copy.try_move(move)
-                eval = Bot.minimax(game_copy, depth - 1, False, alpha, beta)
+                eval = self.minimax(game_copy, depth - 1, False, alpha, beta)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
                 if beta <= alpha:
@@ -49,7 +48,7 @@ class Bot:
             for move in game.available_moves():
                 game_copy = deepcopy(game)
                 game_copy.try_move(move)
-                eval = Bot.minimax(game_copy, depth - 1, True, alpha, beta)
+                eval = self.minimax(game_copy, depth - 1, True, alpha, beta)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
                 if beta <= alpha:
@@ -60,13 +59,14 @@ class Bot:
         best_eval = float("-inf")
         available_moves = self.game.available_moves()
 
-        if len(available_moves) in (self.game.size**2, self.game.size**2 - 1):
-            return available_moves[0]
-
         for move in available_moves:
             game_copy = deepcopy(self.game)
             game_copy.try_move(move)
-            eval = Bot.minimax(game_copy, min(len(available_moves), 15-2*self.game.size), False, float("-inf"), float("inf"))
+            if self.game.size == 3:
+                eval = self.minimax(game_copy, len(available_moves), False, float("-inf"), float("inf"))
+            else:
+                eval = self.minimax(game_copy, min(4 - (self.game.size - 4), len(available_moves)),
+                                    False, float("-inf"), float("inf"))
             if eval > best_eval:
                 best_eval = eval
                 best_move = move

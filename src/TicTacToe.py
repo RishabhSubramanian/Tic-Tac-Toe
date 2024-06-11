@@ -4,6 +4,8 @@ from typing import Optional
 
 Point = tuple[int, int]
 
+PIECES = {0: ' ', 1: 'X', 2: 'O', 3: 'V', 4: 'W'}
+
 class Grid:
     """
     Specialized class for a grid, a two-dimensional array of integers that represents a TicTacToe
@@ -31,7 +33,12 @@ class Grid:
         self.values = [[0 for i in range(size)] for j in range(size)]
 
     def __repr__(self) -> str:
-        return str(np.array(self.values))
+        string = '|'.join([PIECES[cell] for cell in self.values[0]]) + '\n'
+        for row in self.values[1:]:
+            string += '-' * (2 * self.size - 1) + '\n'
+            string += '|'.join([PIECES[cell] for cell in row]) + '\n'
+
+        return string
 
     @property
     def transposed_values(self) -> list[list[int]]:
@@ -116,13 +123,16 @@ class TicTacToe:
         if size > 7:
             raise ValueError('Board is too large to play game')
 
-        if size == 3 and num_players > 2:
-            raise ValueError('Size must be greater than 3 for a game with more than 2 players')
+        # if size == 3 and num_players > 2:
+        #     raise ValueError('Size must be greater than 3 for a game with more than 2 players')
 
         self.num_players = num_players
         self.size = size
         self.cur_player = 1
         self.grid = Grid(size)
+    
+    def __repr__(self) -> str:
+        return str(self.grid)
 
     @property
     def copy(self) -> "TicTacToe":
