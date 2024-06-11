@@ -159,9 +159,6 @@ class TicTacToe:
     # Methods
 
     def winning_line(self) -> Optional[list[Point]]:
-        if self.grid.full:
-            return []
-
         if (all(self.grid.values[i][i] == self.grid.values[0][0] for i in range(self.size)) and
             self.grid.values[0][0] != 0):
             return [(i, i) for i in range(self.size)]
@@ -179,6 +176,9 @@ class TicTacToe:
             col = self.grid.transposed_values[c]
             if all(x == col[0] for x in col) and (col[0] != 0):
                 return [(i, c) for i in range(self.size)]
+        
+        if self.grid.full:
+            return []
 
         return None
 
@@ -200,3 +200,11 @@ class TicTacToe:
         self.cur_player = ((self.cur_player) % self.num_players) + 1
 
         return True
+
+    def available_moves(self) -> list[Point]:
+        moves = []
+        for r in range(self.size):
+            for c in range(self.size):
+                if self.grid.get_cell((r, c)) == 0:
+                    moves.append((r, c))
+        return moves

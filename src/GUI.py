@@ -4,7 +4,7 @@ from typing import Callable, Optional
 import time
 import pygame as pg
 from TicTacToe import TicTacToe
-
+from Bot import Bot
 
 class Button:
     """
@@ -76,6 +76,7 @@ class GUI:
     num_players: int
     board_size: int
     player_types: list[bool]
+    bots: list[Optional[Bot]]
     game: TicTacToe
 
     def __init__(self, width: int, height: int) -> None:
@@ -94,12 +95,13 @@ class GUI:
             2: self.draw_game_screen
         }
         self.buttons = []
-        
+
         self.clock = pg.time.Clock()
         self.starting_time = time.time()
         self.num_players = 2
         self.board_size = 3
         self.player_types = [False, False]
+        self.bots = [None, None]
 
         self.fonts = {
             'Huge Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//7, width//4)),
@@ -107,7 +109,8 @@ class GUI:
             'Small Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//30, width//21)),
             'Tiny Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//40, width//28)),
             'Unicode': pg.font.Font("assets/fonts/unicode_font.ttf", min(height//30, width//20)),
-            'Piece': pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)/10))
+            'Piece': pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
+                                                                            (16*self.size[1]/25)/self.board_size)/10))
         }
 
     def incr_num_players(self) -> None:
@@ -115,26 +118,34 @@ class GUI:
             if self.board_size != 3:
                 self.num_players += 1
                 self.player_types += [False]
+                self.bots += [None]
 
     def decr_num_players(self) -> None:
         if self.num_players > 2:
             self.num_players -= 1
             self.player_types.pop()
-    
+
     def incr_board_size(self) -> None:
         if self.board_size < 7:
             self.board_size += 1
-            self.fonts['Piece'] = pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)/10))
-    
+            self.fonts['Piece'] = pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
+                                                                                         (16*self.size[1]/25)/self.board_size)/10))
+
     def decr_board_size(self) -> None:
         if self.board_size > 3:
             self.board_size -= 1
-            self.fonts['Piece'] = pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)/10))
+            self.fonts['Piece'] = pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
+                                                                                         (16*self.size[1]/25)/self.board_size)/10))
 
     def next_screen(self) -> None:
         self.screen_type = (self.screen_type + 1) % 3
-        if self.screen_type == 1:
-            self.game = TicTacToe(self.num_players, self.board_size)
+
+    def next_screen_12(self) -> None:
+        self.screen_type = 2
+        self.game = TicTacToe(self.num_players, self.board_size)
+        for i in range(self.num_players):
+            if self.player_types[i]:
+                self.bots[i] = Bot(self.game, i+1)
 
     def change_player_type(self, player: int):
         self.player_types[player-1] = not self.player_types[player-1]
@@ -149,7 +160,7 @@ class GUI:
                                       self.size[1]/4 * (1 + np.sin(time.time() - self.starting_time)/10)))
 
         box_size = min(self.size[0]/7, self.size[1]/7)
-        
+
         player_text = self.fonts['Small Arcade'].render('PLAYERS', True, '#A7C7E7')
         self.screen.blit(player_text, (self.size[0]/5 + box_size/2 - player_text.get_width()/2,
                                        self.size[1]/2 - box_size/2))
@@ -244,31 +255,27 @@ class GUI:
                              '#FFFFFF', True, '#FFFFFF')
         next_button.show(self.screen)
         
-        self.buttons.append((next_button, self.next_screen))
+        self.buttons.append((next_button, self.next_screen_12))
 
     def draw_game_screen(self) -> None:
         assert self.screen_type == 2
 
         self.screen.fill(BACKGROUND_COLOR)
-        
+
         cell_size = min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)
         padding = ((self.size[0] - cell_size*self.board_size)/2, (4*self.size[1]/5 - cell_size*self.board_size)/2)
-        
+
         for i in range(1, self.board_size):
             pg.draw.line(self.screen, "#FFFFFF", (padding[0], padding[1] + i*cell_size),
                          (self.size[0] - padding[0], padding[1] + i*cell_size), int(cell_size//20))
             pg.draw.line(self.screen, "#FFFFFF", (padding[0] + i*cell_size, padding[1]),
                          (padding[0] + i*cell_size, 4*self.size[1]/5 - padding[1]), int(cell_size//20))
-        
+
         self.buttons = []
+
         for row in range(self.board_size):
             for col in range(self.board_size):
                 cell = self.game.grid.get_cell((row, col))
-                if cell == 0:
-                    piece = ''
-                    color = BACKGROUND_COLOR
-                else:
-                    piece, color = PIECES[cell-1]
 
                 if self.game.game_over:
                     winning_line = self.game.winning_line()
@@ -278,10 +285,10 @@ class GUI:
                                                                      padding[1]+(row+1/30)*cell_size,
                                                                      0.95*cell_size, 0.95*cell_size))
 
-                cell_button = Button(piece, (padding[0] + (col+1/20)*cell_size, padding[1] + (row+1/20)*int(cell_size)),
-                                     self.fonts['Piece'], (int(cell_size), int(cell_size)), color, False)
-                cell_button.show(self.screen)
-                self.buttons.append((cell_button, lambda r=row, c=col: self.game.try_move((r, c)) if not self.game.game_over else None))
+                if cell != 0:
+                    piece = self.fonts['Piece'].render(PIECES[cell-1][0], True, PIECES[cell-1][1])
+                    self.screen.blit(piece, (padding[0] + (col+1/20)*cell_size + (cell_size - piece.get_width())/2,
+                                            padding[1] + (row+1/20)*cell_size + (cell_size - piece.get_height())/2))
 
         if self.game.game_over:
             if len(self.game.winners()) > 1:
@@ -313,7 +320,8 @@ class GUI:
                         'Small Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//30, event.w//21)),
                         'Tiny Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//40, event.w//28)),
                         'Unicode': pg.font.Font("assets/fonts/unicode_font.ttf", min(event.h//30, event.w//20)),
-                        'Piece': pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)/10))
+                        'Piece': pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
+                                                                                        (16*self.size[1]/25)/self.board_size)/10))
                     }
 
                 for button, func in self.buttons:
@@ -324,11 +332,26 @@ class GUI:
 
             pg.display.flip()
             self.clock.tick(60)
-            
+
             if self.screen_type == 2:
                 if self.game.game_over:
                     time.sleep(2)
                     self.next_screen()
+                elif self.player_types[self.game.cur_player-1]:
+                    bot = self.bots[self.game.cur_player-1]
+                    assert bot
+                    move = bot.get_move()
+                    self.game.try_move(move)
+                else:
+                    if 1 in pg.mouse.get_pressed():
+                        x, y = pg.mouse.get_pos()
+                        cell_size = min((9*self.size[0]/10)/self.board_size, (16*self.size[1]/25)/self.board_size)
+                        padding = ((self.size[0] - cell_size*self.board_size)/2, (4*self.size[1]/5 - cell_size*self.board_size)/2)
+                        row = int((y - padding[1])//cell_size)
+                        col = int((x - padding[0])//cell_size)
+                        if 0 <= row < self.board_size and 0 <= col < self.board_size:
+                            self.game.try_move((row, col))
 
-gui = GUI(600, 800)
-gui.run()
+if __name__ == '__main__':
+    gui = GUI(600, 800)
+    gui.run()
