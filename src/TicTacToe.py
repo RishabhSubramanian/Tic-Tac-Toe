@@ -1,25 +1,25 @@
-import numpy as np
 from copy import deepcopy
 from typing import Optional
 
-Point = tuple[int, int]
+Point = tuple[int, int] # Type alias for a point in the grid
 
-PIECES = {0: ' ', 1: 'X', 2: 'O', 3: 'V', 4: 'W'}
+PIECES = {0: ' ', 1: 'X', 2: 'O', 3: 'V', 4: 'W'} # Characters that represent the players in the game
 
 class Grid:
     """
-    Specialized class for a grid, a two-dimensional array of integers that represents a TicTacToe
-        Game State
+    Specialized class for a square grid, a two-dimensional array of integers that is used to represent
+        a TicTacToe Game State
     
     Attributes:
-        size [int]: 
-        values [list[list[int]]]: 
-        transposed_values [list[list[int]]]: 
-        full [bool]: 
+        size [int]: Size of the grid
+        values [list[list[int]]]: Two-dimensional array of values in the grid
+        transposed_values [list[list[int]]]: Transposed values of the grid
+        full [bool]: Whether the grid is full, which means that there are no free spaces, or zeros,
+            in the grid.
     
     Methods:
-        get_cell: 
-        change_value: 
+        get_cell: Returns the value of the grid at a given location
+        change_value: Changes the value of the grid at a given location
     """
 
     size: int
@@ -27,31 +27,25 @@ class Grid:
 
     def __init__(self, size: int) -> None:
         """
-        Constructor
+        Initializes the grid with a given size and sets all values to 0
+        
+        Arguments:
+            size [int]: Size of the grid
         """
         self.size = size
         self.values = [[0 for i in range(size)] for j in range(size)]
 
-    def __repr__(self) -> str:
-        string = '|'.join([PIECES[cell] for cell in self.values[0]]) + '\n'
-        for row in self.values[1:]:
-            string += '-' * (2 * self.size - 1) + '\n'
-            string += '|'.join([PIECES[cell] for cell in row]) + '\n'
-
-        return string
-
     @property
     def transposed_values(self) -> list[list[int]]:
         """
-        Property that holds the matrix of values in the grid transposed
+        Transposed values of the grid
         """
         return [list(row) for row in zip(*self.values)]
 
     @property
     def full(self) -> bool:
         """
-        Property that represents whether the grid is full, which means that there are no free spaces,
-            or zeros, in the grid.
+        Whether the grid is full, which means that there are no free spaces, or zeros, in the grid.
         """
         for row in self.values:
             if 0 in row:
@@ -63,7 +57,7 @@ class Grid:
 
     def get_cell(self, loc: Point) -> int:
         """
-        Method that returns the value of the grid at a given location
+        Returns the value of the grid at a given location
         
         Inputs:
             loc [Point]: Tuple of the location wanted
@@ -77,7 +71,7 @@ class Grid:
 
     def change_value(self, loc: Point, new_value: int) -> None:
         """
-        Method that changes the value of the grid at a given location
+        Changes the value of the grid at a given location
         
         Inputs:
             loc [Point]: Tuple of the location at which the value should be changed
@@ -95,17 +89,18 @@ class TicTacToe:
         2 players in a game
 
     Attributes:
-        num_players [int]: 
-        size [int]: 
-        cur_player [int]: 
-        grid [Grid]: 
-        copy [TicTacToe]: 
-        game_over [bool]: 
-
+        num_players [int]: Number of players in the game
+        size [int]: Size of the board
+        cur_player [int]: Current player
+        grid [Grid]: Grid object that represents the game state
+        game_over [bool]: Whether the game is over or not
+    
     Methods:
-        winning_line: 
-        winners: 
-        try_move: 
+        copy [TicTacToe]: Returns a deep copy of the current game state
+        winning_line: Returns the winning line of the game, if there is one.
+        winners: Returns the list of winners of the game
+        try_move: Attempts to make a move in the game and returns whether the move was successful
+        available_moves: Returns the list of available moves in the game state
     """
 
     num_players: int
@@ -114,6 +109,13 @@ class TicTacToe:
     grid: Grid
 
     def __init__(self, num_players: int = 2, size: int = 3) -> None:
+        """
+        Initializes the game with a given number of players and board size
+        
+        Arguments:
+            num_players [int]: Number of players in the game (default 2)
+            size [int]: Size of the board (default 3)
+        """
         if num_players < 2:
             raise ValueError('Too few players to play game')
         if num_players > 4:
@@ -131,19 +133,22 @@ class TicTacToe:
         self.cur_player = 1
         self.grid = Grid(size)
     
-    def __repr__(self) -> str:
-        return str(self.grid)
+    def __str__(self) -> str:
+        """
+        String representation of the current state of the game
+        """
+        string = '|'.join([PIECES[cell] for cell in self.grid.values[0]]) + '\n'
+        for row in self.grid.values[1:]:
+            string += '-' * (2 * self.size - 1) + '\n'
+            string += '|'.join([PIECES[cell] for cell in row]) + '\n'
 
-    @property
-    def copy(self) -> "TicTacToe":
-        return deepcopy(self)
+        return string
 
     @property
     def game_over(self) -> bool:
         """
-        Property to check whether the game is over, which is determined by checking if there a row,
-            column, or diagonal which has been completely filled by a player or if there are no more
-            empty cells in the grid
+        Whether the game is over, which is determined by checking if there a row, column, or diagonal
+            which has been completely filled by a player or if there are no more empty cells in the grid
         """
         if self.grid.full:
             return True
@@ -167,8 +172,21 @@ class TicTacToe:
         return False
 
     # Methods
+    
+    def copy(self) -> "TicTacToe":
+        """
+        Returns a deep copy of the current game state
+        
+        Returns [TicTacToe]: Deep copy of the current game state
+        """
+        return deepcopy(self)
 
     def winning_line(self) -> Optional[list[Point]]:
+        """
+        Returns the winning line of the game, which is a list of points that represent the row, column,
+        
+        Returns [Optional[list[Point]]]: List of points that represent the winning line of the game
+        """
         if (all(self.grid.values[i][i] == self.grid.values[0][0] for i in range(self.size)) and
             self.grid.values[0][0] != 0):
             return [(i, i) for i in range(self.size)]
@@ -193,6 +211,11 @@ class TicTacToe:
         return None
 
     def winners(self) -> list[int]:
+        """
+        Returns the list of winners of the game, which is a list of the players that have won the game.
+            If there is no winner, an empty list is returned. If the game is a tie, a list of all players
+            is returned.
+        """
         line = self.winning_line()
         if line is None:
             return []
@@ -203,6 +226,15 @@ class TicTacToe:
         return [self.grid.get_cell(line[0])]
 
     def try_move(self, move: Point) -> bool:
+        """
+        Attempts to make a move for the current player in the game and returns whether the move
+            was successful
+        
+        Arguments:
+            move [Point]: Tuple of the location to make the move
+        
+        Returns [bool]: Whether the move was successful
+        """
         if self.grid.get_cell(move) != 0:
             return False
 
@@ -212,6 +244,12 @@ class TicTacToe:
         return True
 
     def available_moves(self) -> list[Point]:
+        """
+        Returns the list of available moves in the game state, which are the locations that are empty
+            in the grid
+        
+        Returns [list[Point]]: List of available moves in the game state
+        """
         moves = []
         for r in range(self.size):
             for c in range(self.size):
