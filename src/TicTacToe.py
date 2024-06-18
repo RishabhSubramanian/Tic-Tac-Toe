@@ -123,8 +123,8 @@ class TicTacToe:
         if size > 7:
             raise ValueError('Board is too large to play game')
 
-        # if size == 3 and num_players > 2:
-        #     raise ValueError('Size must be greater than 3 for a game with more than 2 players')
+        if size == 3 and num_players > 2:
+            raise ValueError('Size must be greater than 3 for a game with more than 2 players')
 
         self.num_players = num_players
         self.size = size

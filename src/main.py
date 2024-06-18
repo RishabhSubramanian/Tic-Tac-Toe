@@ -87,6 +87,7 @@ class GUI:
         self.size = (width, height)
         self.screen = pg.display.set_mode(self.size, pg.RESIZABLE)
         pg.display.set_caption('Tic-Tac-Toe')
+        pg.display.set_icon(pg.image.load("assets/images/icon.png"))
         self.screen_type = 0
 
         self.draw_functions = {
@@ -104,18 +105,18 @@ class GUI:
         self.bots = [None, None]
 
         self.fonts = {
-            'Huge Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//7, width//4)),
-            'Big Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//20, width//14)),
-            'Small Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//30, width//21)),
-            'Tiny Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(height//40, width//28)),
-            'Unicode': pg.font.Font("assets/fonts/unicode_font.ttf", min(height//30, width//20)),
-            'Piece': pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
+            'Huge Arcade': pg.font.Font("assets/fonts/Press_Start_2P.ttf", min(height//7, width//4)),
+            'Big Arcade': pg.font.Font("assets/fonts/Press_Start_2P.ttf", min(height//20, width//14)),
+            'Small Arcade': pg.font.Font("assets/fonts/Press_Start_2P.ttf", min(height//30, width//21)),
+            'Tiny Arcade': pg.font.Font("assets/fonts/Press_Start_2P.ttf", min(height//40, width//28)),
+            'Unicode': pg.font.Font("assets/fonts/Falling_Sky.otf", min(height//30, width//20)),
+            'Piece': pg.font.Font("assets/fonts/Press_Start_2P.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
                                                                             (16*self.size[1]/25)/self.board_size)/10))
         }
 
     def incr_num_players(self) -> None:
         if self.num_players < 4:
-            # if self.board_size != 3:
+            if self.board_size != 3:
                 self.num_players += 1
                 self.player_types += [False]
                 self.bots += [None]
@@ -128,13 +129,13 @@ class GUI:
     def incr_board_size(self) -> None:
         if self.board_size < 7:
             self.board_size += 1
-            self.fonts['Piece'] = pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
+            self.fonts['Piece'] = pg.font.Font("assets/fonts/Press_Start_2P.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
                                                                                          (16*self.size[1]/25)/self.board_size)/10))
 
     def decr_board_size(self) -> None:
         if self.board_size > 3:
             self.board_size -= 1
-            self.fonts['Piece'] = pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
+            self.fonts['Piece'] = pg.font.Font("assets/fonts/Press_Start_2P.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
                                                                                          (16*self.size[1]/25)/self.board_size)/10))
 
     def next_screen(self) -> None:
@@ -315,12 +316,12 @@ class GUI:
                     self.size = (event.w, event.h)
                     self.screen = pg.display.set_mode(self.size, pg.RESIZABLE)
                     self.fonts = {
-                        'Huge Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//7, event.w//4)),
-                        'Big Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//20, event.w//14)),
-                        'Small Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//30, event.w//21)),
-                        'Tiny Arcade': pg.font.Font("assets/fonts/arcade_font.ttf", min(event.h//40, event.w//28)),
-                        'Unicode': pg.font.Font("assets/fonts/unicode_font.ttf", min(event.h//30, event.w//20)),
-                        'Piece': pg.font.Font("assets/fonts/arcade_font.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
+                        'Huge Arcade': pg.font.Font("assets/fonts/Press_Start_2P.ttf", min(event.h//7, event.w//4)),
+                        'Big Arcade': pg.font.Font("assets/fonts/Press_Start_2P.ttf", min(event.h//20, event.w//14)),
+                        'Small Arcade': pg.font.Font("assets/fonts/Press_Start_2P.ttf", min(event.h//30, event.w//21)),
+                        'Tiny Arcade': pg.font.Font("assets/fonts/Press_Start_2P.ttf", min(event.h//40, event.w//28)),
+                        'Unicode': pg.font.Font("assets/fonts/Falling_Sky.otf", min(event.h//30, event.w//20)),
+                        'Piece': pg.font.Font("assets/fonts/Press_Start_2P.ttf", int(9*min((9*self.size[0]/10)/self.board_size,
                                                                                         (16*self.size[1]/25)/self.board_size)/10))
                     }
 

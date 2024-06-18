@@ -65,7 +65,7 @@ class Bot:
             if self.game.size == 3:
                 eval = self.minimax(game_copy, len(available_moves), False, float("-inf"), float("inf"))
             else:
-                eval = self.minimax(game_copy, min(4 - (self.game.size - 4), len(available_moves)),
+                eval = self.minimax(game_copy, min(8 - self.game.size, len(available_moves)),
                                     False, float("-inf"), float("inf"))
             if eval > best_eval:
                 best_eval = eval
