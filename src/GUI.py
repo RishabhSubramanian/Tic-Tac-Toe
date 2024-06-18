@@ -225,11 +225,17 @@ class GUI:
         """
         Decreases the size of the board.
         """
-        if self.board_size > 3:
+        if self.board_size > 4:
             self.board_size -= 1
             new_size = int(9*min((9*self.screen_size[0]/10)/self.board_size,
                                  (16*self.screen_size[1]/25)/self.board_size)/10)
             self.fonts['Piece'] = pg.font.Font("assets/fonts/Press_Start_2P.ttf", new_size)
+        elif self.board_size == 4:
+            if self.num_players == 2:
+                self.board_size -= 1
+                new_size = int(9*min((9*self.screen_size[0]/10)/self.board_size,
+                                        (16*self.screen_size[1]/25)/self.board_size)/10)
+                self.fonts['Piece'] = pg.font.Font("assets/fonts/Press_Start_2P.ttf", new_size)
 
     def next_screen(self) -> None:
         """
